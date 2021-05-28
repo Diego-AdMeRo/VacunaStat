@@ -1,0 +1,67 @@
+CAMBIOS:
+	- Instalacion de mongo: https://www.digitalocean.com/community/tutorials/como-instalar-mongodb-en-ubuntu-18-04-es
+	
+	- Instalacion de apache: https://www.digitalocean.com/community/tutorials/como-instalar-el-servidor-web-apache-en-ubuntu-18-04-es
+	
+	- El firewall (ufw) ha sido habilitado:
+		- ssh: 22
+		- ssl: 443
+		- Apache Secure
+		- Apache 
+		X- Django test: 8000
+		 
+	- Los servicios de Apache y [X]Mongo están corriendo
+		- sudo systemctl status [SERVICIO].service
+
+	- Instalacion de pip y dependencias de google sheets:
+		- Se instaló python-setuptools 
+		- El ambiente de python es actualmente python 3 por lo tanto usar pip3 
+		- Dependencias [pip3 install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib]: https://developers.google.com/sheets/api/quickstart/python
+		- Dependencia de mongo [pip3 install pymongo]
+
+	- Se copio el directorio python-test
+		- Se ha corregido el script quickstart 
+		- Se ha creado base de datos y collections
+		- Se ha importado csv de covid a mongo
+
+	- Se creo el usuario de diego y se le agrego al grupo sudo y se especifico en el archivo sudoers la capacidad de tener todos los permisos: https://www.digitalocean.com/community/tutorials/how-to-add-and-delete-users-on-ubuntu-18-04
+	
+	X- Se creo la base de datos test y se inserto en la collection user un dato para verificar la persistencia (posible solucion?): https://www.mongodb.com/basics/create-database 
+
+        - Se creo una pagina web con certificación SSL
+		- Carpeta raíz /var/www/html/vacstat
+		- Configuración SSL /etc/apache/sites-available/vacstat-ssl.conf
+                - Certificado y llave en /etc/ssl/certs/ (certificado), /etc/ssl/private (Llave privada) y log de errores en /var/log/apache/vacstat (access y error)    
+		- Se habilitó el modulo SSL de APACHE y Apache Secure en el firewall [sudo ufw allow 'Apache Secure']
+	
+	- Se automatizó el ingreso a la base de datos de las vacunas
+		- Se reestructuró el archivo original quickstart.py para que estuviera más limpio, ahora existe una carpeta llamada datos con un script para la conexión con Google Sheets, una carpeta de docs para las credenciales y configuración de conectividad
+		- Se Reconfiguró la hora y fecha de la maquina [sudo timedatectl set-timezone America/Bogota], para visualizarlas las zonas disponibles usar [timedatectl list-timezones]
+		- Se configuró el crontab para que ejecute el archivo daemon-vacunas.sh todos los días a las 7 PM 
+			[sudo crontab -u root -e] Para crear el archivo de ejecución de procesos del usuario root
+			[00 19 * * * /var/www/html/python-test/datos/daemon-vacunas.sh >> /var/www/html/python-test/datos/docs/datos-vacunas.log 2>&1] (minuto, hora, día del mes, mes y día de la semana comando >> log  2>&1 "Tanto de error como exito")
+                - Se configuró el log (docs/datos-vacunas.log) en el que se guarda la fecha, hora y mensaje de las peticiones al Google Sheet
+		- Se añadió la funcionalidad de guardar el ultimo indice valido (fila) del Google Sheet, con el proposito de analizar e insertar solo los ultimos datos ingresados al documento
+		- Se deshabilitó la ejecución de crontab, mientras se revisa la inserción y estructura de la base de datos
+	- Se reestructuró la organización del proyecto, con el objetivo de mantener todo modularizado		 
+	- Se arregló error encontrado en el bash de la ETL
+	- Se agregó la estructura de la página web (Aun en proceso) para pasar los archivos a la maquina se usó https://superuser.com/questions/1265099/aws-disconnected-no-supported-authentication-methods-available-server-sent
+	- Se creó la relación entre la página web y el controlador.py
+    
+    - Se solucionó el conflicto DNS con freenom al incorporar en el servidor DNS los server names brindados por AWS
+        - Se habilito el producto Route 53
+        - Se gestionó una zona alojada con el dominio vacunastat.tk
+            - Se adicionó el registro de vacunastat.tk tipo A Simple con el valor 18.218.33.215 (IP de la maquina)
+            - Se adicionó el registro de www.vacunastat.tk tipo CNAME Simple con el valor vacunastat.tk
+            - Se copiaron los valores del registro vacunastat.tk tipo NS Simple (ns-1147.awsdns-15.org. / ns-1596.awsdns-07.co.uk. / ns-596.awsdns-10.net. / ns-408.awsdns-51.com.)
+            - Se pegaron dichos valores como server names en el Servidor DNS en Freenom
+
+    - Se adicionó el py operaciones con el fin de gestionar las consultas
+        - Se adicionó la consulta entre fechas de dosis asignadas por departamento
+        - Se adicionó la consulta de fecha en aplicaciones por departamento
+        - Se calculó la efectividad en un periodo 
+        - Se calculó la tendencia en un periodo
+        - Se calculó el promedio de efectividad en un periodo
+	- Se calculó las vacunaciones en el perido
+    - Se agregó correo electronico de fallo y exito al actualizar la base de datos
+

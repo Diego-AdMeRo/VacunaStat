@@ -1,0 +1,10 @@
+ Indice 0=Fecha 1=TipoVacuna 2=Operación 3=POBLACIÓN 4=ANOTACIÓN
+ 5=AMA(Amazonas) 6=ANT(Antioquia) 7=ARA(Arauca) 8=ATL(Atlantico) 9=BAR(Barranquilla-Atlantico)
+ 10=BOG(Bogotá) 11=BOL(Bolivar) 12=CAR(Cartagena-Bolivar) 13=BOY(Boyaca) 14=CAL(Caldas)
+ 15=CAQ(Caqueta) 16=CAS(Casanare) 17=CAU(Cauca) 18=CES(Cesar) 19=CHO(Chocó)
+ 20=COR(Cordoba) 21=CUN(Cundinamarca) 22=GUA(Guainia) 23=GUV(Guviare) 24=HUI(Huila)
+ 25=LAG(La Guajira) 26=MAG(Magdalena) 27=STM(Santa Marta-Magdalena) 28=MET(Meta)
+ 29=NAR(Nariño) 30=NSA(Norte de Santander) 31=PUT(Putumayo) 32=QUI(Quindío)
+ 33=RIS(Risaralda) 34=SAP(San Andres y Providencia) 35=SAN(Santander) 36=SUC(Sucre)
+ 37=TOL(Tolima) 38=VAC(Valle del Cauca) 39=BAV(Buenaventura-Valle del Cauca)
+ 40=VAU(Vaupés) 41=VID(Vichada)  42=CO(Colombia)

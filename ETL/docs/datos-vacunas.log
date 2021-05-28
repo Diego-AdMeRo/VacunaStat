@@ -1,0 +1,73 @@
+2021/4/7 21:24:7 - Nuevos Datos Agregados2021/4/7 21:40:52 - Nuevos Datos Agregados
+2021/4/7 21:44:54 - Error al Agregar Nuevos Datos <class 'PermissionError'>
+2021/4/7 21:46:33 - Error al Agregar Nuevos Datos <class 'PermissionError'>
+2021/4/7 21:47:36 - Nuevos Datos Agregados
+Traceback (most recent call last):
+  File "/var/www/html/python-test/datos/daemon-vacunas.sh", line 4, in <module>
+    python3 /var/www/html/python-test/datos/datosVacunas.py
+NameError: name 'python3' is not defined
+Traceback (most recent call last):
+  File "/var/www/html/python-test/datos/daemon-vacunas.sh", line 4, in <module>
+    python3 /var/www/html/python-test/datos/datosVacunas.py
+NameError: name 'python3' is not defined
+Traceback (most recent call last):
+  File "/var/www/html/python-test/datos/daemon-vacunas.sh", line 4, in <module>
+    python3 /var/www/html/python-test/datos/datosVacunas.py
+NameError: name 'python3' is not defined
+Traceback (most recent call last):
+  File "/var/www/html/python-test/datos/datosVacunas.py", line 88, in <module>
+    main()
+  File "/var/www/html/python-test/datos/datosVacunas.py", line 37, in main
+    configuracion = cargarJSON("./docs/configuracion.json")
+  File "/var/www/html/python-test/datos/datosVacunas.py", line 18, in cargarJSON
+    with open(ruta, encoding='utf8') as archivo:
+FileNotFoundError: [Errno 2] No such file or directory: './docs/configuracion.json'
+Traceback (most recent call last):
+  File "/var/www/html/python-test/datos/datosVacunas.py", line 88, in <module>
+    main()
+  File "/var/www/html/python-test/datos/datosVacunas.py", line 37, in main
+    configuracion = cargarJSON("./docs/configuracion.json")
+  File "/var/www/html/python-test/datos/datosVacunas.py", line 18, in cargarJSON
+    with open(ruta, encoding='utf8') as archivo:
+FileNotFoundError: [Errno 2] No such file or directory: './docs/configuracion.json'
+/bin/sh: 1: root: not found
+/bin/sh: 1: root: not found
+/bin/sh: 1: root: not found
+2021/4/7 23:14:3 - Nuevos Datos Agregados
+2021/4/7 23:15:2 - Nuevos Datos Agregados
+2021/4/7 23:20:2 - Nuevos Datos Agregados
+2021/5/6 21:51:40 - Nuevos Datos Agregados
+2021/5/6 17:1:9 - Nuevos Datos Agregados
+2021/5/6 17:3:45 - Nuevos Datos Agregados
+2021/5/6 19:0:4 - Nuevos Datos Agregados
+2021/5/7 19:0:3 - Nuevos Datos Agregados
+2021/5/8 19:0:2 - No se han encontrado datos
+2021/5/9 19:0:3 - No se han encontrado datos
+2021/5/10 19:0:3 - Nuevos Datos Agregados
+2021/5/11 19:0:4 - Nuevos Datos Agregados
+2021/5/15 15:41:48 - Nuevos Datos Agregados
+2021/5/16 12:40:41 - Nuevos Datos Agregados
+2021/5/16 12:43:19 - No se han encontrado datos
+2021/5/16 12:50:0 - No se han encontrado datos
+2021/5/16 19:0:3 - No se han encontrado datos
+2021/5/17 19:0:4 - Nuevos Datos Agregados
+2021/5/18 19:0:3 - Nuevos Datos Agregados
+2021/5/19 13:53:18 - Nuevos Datos Agregados
+2021/5/19 19:0:4 - Nuevos Datos Agregados
+2021/5/19 19:19:48 - Nuevos Datos Agregados
+2021/5/20 19:0:4 - Nuevos Datos Agregados
+2021/5/21 10:6:35 - No se han encontrado datos
+2021/5/21 10:12:49 - No se han encontrado datos
+2021/5/21 10:18:21 - No se han encontrado datos
+2021/5/21 10:21:34 - No se han encontrado datos
+2021/5/21 10:23:30 - No se han encontrado datos
+2021/5/21 10:24:46 - No se han encontrado datos
+2021/5/21 10:29:42 - No se han encontrado datos
+2021/5/21 19:0:4 - Nuevos Datos Agregados
+2021/5/22 19:0:4 - Nuevos Datos Agregados
+2021/5/23 19:0:3 - Nuevos Datos Agregados
+2021/5/24 10:2:26 - Nuevos Datos Agregados
+2021/5/24 19:0:3 - Nuevos Datos Agregados
+2021/5/25 19:0:4 - Nuevos Datos Agregados
+2021/5/26 19:0:4 - No se han encontrado datos
+2021/5/27 19:0:3 - Nuevos Datos Agregados

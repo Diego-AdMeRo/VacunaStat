@@ -1,0 +1,171 @@
+import pymongo
+from datetime import datetime, timedelta
+import json
+
+
+class Operaciones():
+
+    def __init__(self):
+        client = pymongo.MongoClient("mongodb://localhost:27017/")
+        database = client['vacunas']
+        self.collection_primeras = database['primeras']
+        self.collection_segundas = database['segundas']
+        self.collection_asignadas = database['asignadas']
+        with open("../docs/datos.json", encoding='utf8') as archivo:
+            datos = json.loads(archivo.read())
+            self.diccionarios = datos["llaves"]
+            self.departamentos = datos["paises"]  # Esto tiene en cuenta tanto el nombre como su población
+
+    def reporteGeneral(self, fechaInicial, fechaFinal):
+        diccionario_fecha_inicial_asignaciones = {}
+        diccionario_fecha_final_asignaciones = {}
+        rango = (fechaFinal - fechaInicial).days
+#        print('--------------- FECHA INICIAL -------------')
+        for departamento in self.diccionarios:
+            query = [
+                {'$match': {'FECHA': {'$gte': fechaInicial, '$lt': fechaFinal}}},
+                {'$group': {'_id': '$None', 'suma': {'$sum': '$'+str(departamento)}}}
+            ]
+            asignadas_suma_departamento = self.collection_asignadas.aggregate(query)
+            for resultado in asignadas_suma_departamento:
+                diccionario_fecha_inicial_asignaciones[departamento] = resultado['suma']
+#                print('%s -> %d' % (departamento, resultado['suma']))
+#        print('------------- FECHA FINAL ---------------')
+        for departamento in self.diccionarios:
+            query = [
+                {'$match': {'FECHA': {'$gte': fechaInicial, '$lt': fechaFinal}}},
+                {'$group': {'_id': '$None', 'suma': {'$sum': '$'+str(departamento)}}}
+            ]
+            asignadas_suma_departamento = self.collection_asignadas.aggregate(query)
+            for resultado in asignadas_suma_departamento:
+                diccionario_fecha_final_asignaciones[departamento] = resultado['suma']
+#                print('%s -> %d' % (departamento, resultado['suma']))
+
+#        print('--------------- FEHCA INICIAL APLICADAS ------------')
+
+        diccionario_fecha_inicial_aplicadas = {}
+        fechaInicialApli = self.obtenerFecha(fechaInicial, "primeras", "Mayor", rango)
+        if fechaInicialApli is not None:
+            for resultado in self.collection_primeras.find({'FECHA': fechaInicialApli}):
+                for departamento in self.diccionarios:
+                    diccionario_fecha_inicial_aplicadas[departamento] = resultado[departamento]
+#                print('%s -> %d' % (departamento, resultado[departamento]))
+        else:
+            diccionario_fecha_inicial_aplicadas["E"] = "ERROR DE FECHA"
+#        print('--------------- FEHCA FINAL APLICADAS ------------')
+
+        diccionario_fecha_final_aplicadas = {}
+        fechaFinalApli = self.obtenerFecha(fechaFinal, "primeras", "Menor", rango)
+        if fechaFinalApli is not None:
+            for resultado in self.collection_primeras.find({'FECHA': fechaFinalApli}):
+                for departamento in self.diccionarios:
+                    diccionario_fecha_final_aplicadas[departamento] = resultado[departamento]
+        #                print('%s -> %d' % (departamento, resultado[departamento]))
+        else:
+            diccionario_fecha_final_aplicadas["E"] = "ERROR DE FECHA"
+
+        efectividad_fecha_inicial = {}
+        efectividad_fecha_final = {}
+        efectividad_prom = {}
+        efectividad_tendencia = {}
+        if not ("E" in diccionario_fecha_inicial_aplicadas or "E" in diccionario_fecha_final_aplicadas):
+            for departamento in self.diccionarios:
+                efectividad_fecha_inicial[departamento] = 100*(diccionario_fecha_inicial_aplicadas[departamento]/diccionario_fecha_inicial_asignaciones[departamento])
+                efectividad_fecha_final[departamento] = 100*(diccionario_fecha_final_aplicadas[departamento]/diccionario_fecha_final_asignaciones[departamento])
+                efectividad_prom[departamento] = (efectividad_fecha_inicial[departamento]+efectividad_fecha_final[departamento])/2
+                efectividad_tendencia[departamento] = efectividad_fecha_final[departamento]-efectividad_fecha_inicial[departamento]
+
+        segundas_dosis = -100000
+        fechaFinalSegDosis = self.obtenerFecha(fechaFinal, "segundas", "Menor", rango)
+        if fechaFinalSegDosis is not None:
+            segundas_dosis = self.collection_segundas.find_one({"FECHA": fechaFinalSegDosis})["CO"]
+
+        respuesta = []
+        # print('DEPT.\tA-INCIAL\tAP-INICIAL\tA-FINAL\tAP-FINAL\tE-INICIAL\tE-FINAL\tE-PROM\tE-TEN\tAP-RANGO')
+        # print('--------------------------------------------------------------------------')
+        for departamento in self.diccionarios:
+            # print('%s...\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%d' % (
+            #        departamento,
+            #        diccionario_fecha_inicial_asignaciones[departamento],
+            #        diccionario_fecha_inicial_aplicadas[departamento],
+            #        diccionario_fecha_final_asignaciones[departamento],
+            #        diccionario_fecha_final_aplicadas[departamento],
+            #        efectividad_fecha_inicial[departamento],
+            #        efectividad_fecha_final[departamento],
+            #        efectividad_prom[departamento],
+            #        efectividad_tendencia[departamento],
+            #        diccionario_intervalo_aplicadas[departamento]))
+            if "E" in diccionario_fecha_inicial_aplicadas and "E" in diccionario_fecha_final_aplicadas:
+                datos = {
+                    "COD": departamento,
+                    "NOM": self.departamentos[departamento]["nombre"],
+                    "ASIG_INI": diccionario_fecha_inicial_asignaciones[departamento],
+                    "ASIG_FIN": diccionario_fecha_final_asignaciones[departamento]
+                }
+            elif "E" in diccionario_fecha_inicial_aplicadas and "E" not in diccionario_fecha_final_aplicadas:
+                datos = {
+                    "COD": departamento, "NOM": self.departamentos[departamento]["nombre"],
+                    "ASIG_INI": diccionario_fecha_inicial_asignaciones[departamento],
+                    "ASIG_FIN": diccionario_fecha_final_asignaciones[departamento],
+                    "APLI_FIN": diccionario_fecha_final_aplicadas[departamento]
+                }
+            elif "E" in diccionario_fecha_final_aplicadas and "E" not in diccionario_fecha_inicial_aplicadas:
+                datos = {
+                    "COD": departamento,
+                    "NOM": self.departamentos[departamento]["nombre"],
+                    "ASIG_INI": diccionario_fecha_inicial_asignaciones[departamento],
+                    "ASIG_FIN": diccionario_fecha_final_asignaciones[departamento],
+                    "APLI_INI": diccionario_fecha_inicial_aplicadas[departamento]
+                }
+            else:
+                datos = {
+                    "COD": departamento, "NOM": self.departamentos[departamento]["nombre"],
+                    "ASIG_INI": diccionario_fecha_inicial_asignaciones[departamento],
+                    "ASIG_FIN": diccionario_fecha_final_asignaciones[departamento],
+                    "APLI_INI": diccionario_fecha_final_aplicadas[departamento],
+                    "APLI_FIN": diccionario_fecha_final_asignaciones[departamento],
+                    "EFEC_INI": self.formatoPorcentaje(efectividad_fecha_inicial[departamento]),
+                    "EFEC_FIN": self.formatoPorcentaje(efectividad_fecha_final[departamento]),
+                    "EFEC_PROM": self.formatoPorcentaje(efectividad_prom[departamento]),
+                    "EFEC_TEND": self.formatoPorcentaje(efectividad_tendencia[departamento]),
+                    "APLI_RANGO": diccionario_fecha_final_aplicadas[departamento] - diccionario_fecha_inicial_aplicadas[departamento],
+                    "PORC_VAC": self.formatoPorcentaje(diccionario_fecha_final_asignaciones[departamento] / self.departamentos[departamento]["poblacion"]*100)
+                }
+            if departamento == "CO":
+                datos["SEG_DOSIS"] = segundas_dosis if segundas_dosis != -100000 else 0
+            respuesta.append(datos)
+        return respuesta
+
+    def vacunasDiarias(self, zona, fechaFinal):
+        primerVacunacion = self.collection_primeras.find_one()
+        query = {"FECHA": {"$gte": primerVacunacion["FECHA"] + timedelta(days=1), "$lt": fechaFinal}}
+        cursor = self.collection_primeras.find(query)
+
+        vacunas_diarias = [{"FECHA": primerVacunacion["FECHA"].strftime('%Y-%m-%d'), "VAC": primerVacunacion[zona]}]
+        anterior = primerVacunacion
+
+        for elemento in cursor:
+            vacunacion_fecha = {"FECHA": elemento["FECHA"].strftime("%Y-%m-%d"), "VAC": elemento[zona] - anterior[zona]}
+            vacunas_diarias.append(vacunacion_fecha)
+            anterior = elemento
+        return vacunas_diarias
+
+    def obtenerFecha(self, fecha, collection, mayorMenor, rango):
+        fechaInicial = fecha - timedelta(days=rango) if mayorMenor == "Menor" else fecha
+        fechaFinal = fecha + timedelta(days=rango) if mayorMenor == "Mayor" else fecha
+        sort = -1 if mayorMenor == "Menor" else 1
+        query = {'FECHA': {'$gte': fechaInicial, '$lt': fechaFinal}}
+        if collection == "asignadas":
+            cursor = self.collection_asignadas.find(query).sort([("FECHA", sort)]).limit(1)
+        elif collection == "primeras":
+            cursor = self.collection_primeras.find(query).sort([("FECHA", sort)]).limit(1)
+        elif collection == "segundas":
+            cursor = self.collection_segundas.find(query).sort([("FECHA", sort)]).limit(1)
+        resultado = next(cursor, None)
+        if resultado:
+            return resultado["FECHA"]
+        return None
+
+    def formatoPorcentaje(self, numero):
+        decimales = 2
+        return round(numero, decimales)

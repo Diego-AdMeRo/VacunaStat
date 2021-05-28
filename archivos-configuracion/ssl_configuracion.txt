@@ -1,0 +1,16 @@
+HISTORIAL:
+
+   87  cp default-ssl.conf vacstat.conf
+   88  vi vacstat.conf 
+   89  cd /etc/ssl/
+   90  ls
+   91  sudo openssl genrsa -out vacstat.key 2048
+   92  sudo openssl req -new -key vacstat.key  -out vacstat.csr
+   93  ls
+   94  sudo openssl x509 -req -days 365 -in vacstat.csr -signkey vacstat.key -out vacstat.crt
+   95  ls
+   96  cd ../apache2/sites-available/
+   97  ls
+   98  vi vacstat.conf 
+   99  a2ensite vacstat.conf 
+   100 a2enmod ssl

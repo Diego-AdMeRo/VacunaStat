@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VacunaStat</title>
+    <link rel="shortcut icon" href="img/favicon.ico">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
+        crossorigin="anonymous"></script>
+    <!-- Mapbox -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.css" rel="stylesheet" />
+    <!-- c3js -->
+    <link href="css/c3.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
+    <script src="js/c3.min.js"></script>
+
+    <!-- chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Archivos Propios -->
+    <link href="css/style.css" rel="stylesheet">
+    <script src="js/fuente.js"></script>
+    <script src="js/graficas.js"></script>
+</head>
+
+<body>
+    <div class="container my-0 py-0">
+        <header class="border-bottom bg-dark my-0 py-0 rounded">
+            <div class="row flex-nowrap justify-content-between align-items-center">
+                <div class="col-3">
+                    <div class="d-flex mx-3 header__logo">
+                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" style="height: 100%; width: 100px;">
+	    		            <g>
+		    		            <path 
+                                    d="M96.7367,26.5156l-5.9074-12.0683c-0.4339-0.8855-1.5032-1.2524-2.389-0.8189c-0.8859,0.4339-1.2524,1.5032-0.8189,2.389   l2.1686,4.4304l-8.0758,3.9529l-4.7564-9.717c-0.4339-0.8855-1.5035-1.2521-2.389-0.8189   c-0.8859,0.4339-1.2524,1.5032-0.8189,2.389l1.4185,2.8979L35.2689,38.6823c-0.8859,0.4339-1.2524,1.5032-0.8189,2.389   l1.1359,2.3208l-6.4905,3.1772c-0.8859,0.4339-1.2524,1.5032-0.8189,2.389l0.6316,1.2905L7.798,60.5823   c-0.8859,0.4339-1.2524,1.5032-0.8189,2.389c0.3101,0.633,0.9448,1.001,1.6054,1.001c0.2633,0,0.5312-0.0586,0.7837-0.1821   l21.11-10.3335l0.6317,1.2907c0.2082,0.4251,0.5769,0.7505,1.025,0.904c0.188,0.0645,0.3836,0.0966,0.579,0.0966   c0.2696,0,0.5385-0.061,0.7851-0.1817l6.4909-3.1772l1.1359,2.3206c0.2082,0.4255,0.5769,0.7505,1.025,0.904   c0.188,0.0645,0.3836,0.0966,0.5789,0.0966c0.2696,0,0.5385-0.061,0.7851-0.1817l39.8998-19.5308l1.4184,2.8978   c0.3101,0.633,0.9448,1.001,1.6054,1.001c0.2633,0,0.5312-0.0586,0.7837-0.1821c0.8859-0.4339,1.2524-1.5032,0.8189-2.389   l-2.2031-4.5007c-0.0002-0.0004-0.0003-0.0008-0.0004-0.0012l-2.5529-5.2152l8.0758-3.9529l2.1684,4.43   c0.3101,0.633,0.9448,1.001,1.6054,1.001c0.2633,0,0.5312-0.0586,0.7837-0.1821C96.8037,28.4708,97.1702,27.4015,96.7367,26.5156z    M33.5327,51.5734l-0.6308-1.2886c-0.0004-0.0007-0.0004-0.0015-0.0008-0.0022c-0.0003-0.0007-0.0009-0.0012-0.0012-0.002   l-0.6307-1.2885L37.156,46.6l0.6318,1.2906l0.6318,1.2906L33.5327,51.5734z M78.3747,34.4883l-1.6066-3.1995   c-0.4422-0.881-1.5157-1.2367-2.3974-0.7945c-0.8813,0.4426-1.2367,1.5161-0.7945,2.3974l1.5903,3.167l-3.6853,1.804   l-2.1847-4.4632c-0.4339-0.8855-1.5035-1.2524-2.389-0.8189c-0.8859,0.4339-1.2524,1.5032-0.8189,2.389l2.1847,4.4633   l-3.7185,1.8202l-1.5391-3.063c-0.4433-0.8813-1.5164-1.236-2.3974-0.7938c-0.881,0.4429-1.2367,1.5161-0.7938,2.3974   l1.5224,3.0297l-3.6851,1.8039l-2.1432-4.3784c-0.4335-0.8855-1.5035-1.2524-2.389-0.8189   c-0.8859,0.4339-1.2524,1.5032-0.8189,2.389l2.1432,4.3785l-3.6083,1.7663l-1.5391-3.0631   c-0.4429-0.8813-1.5161-1.2364-2.3974-0.7938c-0.881,0.4429-1.2367,1.5161-0.7938,2.3974l1.5224,3.0298l-4.0889,2.0015   l-1.1359-2.3206c0,0,0-0.0001,0-0.0001l-1.4169-2.8946l-2.5528-5.2153l38.2955-18.7454l2.553,5.2151l2.5528,5.2152L78.3747,34.4883   z" fill="#ffffff">
+                                </path>
+				                <path 
+                                    d="M8.5831,68.2963c-0.6522,0-1.2528,0.3557-1.5663,0.9281C5.9806,71.1164,2.6,77.4905,2.6,80.0651   c0,3.299,2.6841,5.9831,5.9831,5.9831s5.9827-2.6841,5.9827-5.9831c0-2.5746-3.3802-8.9486-4.4164-10.8407   C9.8358,68.6521,9.2356,68.2963,8.5831,68.2963z M8.5831,82.4768c-1.3298,0-2.4117-1.0819-2.4117-2.4117   c0-0.8067,1.0833-3.4005,2.4117-6.1037c1.3284,2.7026,2.4114,5.296,2.4114,6.1037C10.9944,81.3949,9.9126,82.4768,8.5831,82.4768z" fill="#ffffff">
+                                </path>
+			                </g>
+		                </svg>
+                    </div>
+                </div>
+                <div class="col-3 text-center">
+                    <span class="fs-4 header__titulo" style="color:#ffffff">VacunaStat</span>
+                </div>
+                <div class="col-3">
+                    <div class="input-group d-flex justify-content-end align-items-center">
+                        <button class="btn dropdown-toggle btn-dark mx-2" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg"
+                                class="bi bi-github header__github" viewBox="0 0 16 16">
+                                <path
+                                    d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z" fill="#ffffff"/>
+                            </svg></button>
+                        <ul class="dropdown-menu" style="z-index: 2000;">
+                            <li><a class="dropdown-item" href="https://github.com/BrandonRodriguezC" target="_blank">
+                                    <p class="my-0">Brandon Rodriguez Caro</p>
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="https://github.com/Diego-AdMeRo" target="_blank">
+                                    <p class="my-0">Diego Adrián Meneses Romero</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="my-0 py-0">
+            <!--<div class="row">
+            Revisar este es el banner
+                <div class="col-sm-12 filas">
+                    <div class="d-flex">
+                        <svg class="aling-self-center"  version="1.1" xmlns="http://www.w3.org/2000/svg" style="height: 100%; width: 100%;">
+		                    <g transform="translate(740, 0)">
+			                    <path
+				                    d="M96.7367,26.5156l-5.9074-12.0683c-0.4339-0.8855-1.5032-1.2524-2.389-0.8189c-0.8859,0.4339-1.2524,1.5032-0.8189,2.389   l2.1686,4.4304l-8.0758,3.9529l-4.7564-9.717c-0.4339-0.8855-1.5035-1.2521-2.389-0.8189   c-0.8859,0.4339-1.2524,1.5032-0.8189,2.389l1.4185,2.8979L35.2689,38.6823c-0.8859,0.4339-1.2524,1.5032-0.8189,2.389   l1.1359,2.3208l-6.4905,3.1772c-0.8859,0.4339-1.2524,1.5032-0.8189,2.389l0.6316,1.2905L7.798,60.5823   c-0.8859,0.4339-1.2524,1.5032-0.8189,2.389c0.3101,0.633,0.9448,1.001,1.6054,1.001c0.2633,0,0.5312-0.0586,0.7837-0.1821   l21.11-10.3335l0.6317,1.2907c0.2082,0.4251,0.5769,0.7505,1.025,0.904c0.188,0.0645,0.3836,0.0966,0.579,0.0966   c0.2696,0,0.5385-0.061,0.7851-0.1817l6.4909-3.1772l1.1359,2.3206c0.2082,0.4255,0.5769,0.7505,1.025,0.904   c0.188,0.0645,0.3836,0.0966,0.5789,0.0966c0.2696,0,0.5385-0.061,0.7851-0.1817l39.8998-19.5308l1.4184,2.8978   c0.3101,0.633,0.9448,1.001,1.6054,1.001c0.2633,0,0.5312-0.0586,0.7837-0.1821c0.8859-0.4339,1.2524-1.5032,0.8189-2.389   l-2.2031-4.5007c-0.0002-0.0004-0.0003-0.0008-0.0004-0.0012l-2.5529-5.2152l8.0758-3.9529l2.1684,4.43   c0.3101,0.633,0.9448,1.001,1.6054,1.001c0.2633,0,0.5312-0.0586,0.7837-0.1821C96.8037,28.4708,97.1702,27.4015,96.7367,26.5156z    M33.5327,51.5734l-0.6308-1.2886c-0.0004-0.0007-0.0004-0.0015-0.0008-0.0022c-0.0003-0.0007-0.0009-0.0012-0.0012-0.002   l-0.6307-1.2885L37.156,46.6l0.6318,1.2906l0.6318,1.2906L33.5327,51.5734z M78.3747,34.4883l-1.6066-3.1995   c-0.4422-0.881-1.5157-1.2367-2.3974-0.7945c-0.8813,0.4426-1.2367,1.5161-0.7945,2.3974l1.5903,3.167l-3.6853,1.804   l-2.1847-4.4632c-0.4339-0.8855-1.5035-1.2524-2.389-0.8189c-0.8859,0.4339-1.2524,1.5032-0.8189,2.389l2.1847,4.4633   l-3.7185,1.8202l-1.5391-3.063c-0.4433-0.8813-1.5164-1.236-2.3974-0.7938c-0.881,0.4429-1.2367,1.5161-0.7938,2.3974   l1.5224,3.0297l-3.6851,1.8039l-2.1432-4.3784c-0.4335-0.8855-1.5035-1.2524-2.389-0.8189   c-0.8859,0.4339-1.2524,1.5032-0.8189,2.389l2.1432,4.3785l-3.6083,1.7663l-1.5391-3.0631   c-0.4429-0.8813-1.5161-1.2364-2.3974-0.7938c-0.881,0.4429-1.2367,1.5161-0.7938,2.3974l1.5224,3.0298l-4.0889,2.0015   l-1.1359-2.3206c0,0,0-0.0001,0-0.0001l-1.4169-2.8946l-2.5528-5.2153l38.2955-18.7454l2.553,5.2151l2.5528,5.2152L78.3747,34.4883   z" fill="#000000"/>
+			                    <path
+				                    d="M8.5831,68.2963c-0.6522,0-1.2528,0.3557-1.5663,0.9281C5.9806,71.1164,2.6,77.4905,2.6,80.0651   c0,3.299,2.6841,5.9831,5.9831,5.9831s5.9827-2.6841,5.9827-5.9831c0-2.5746-3.3802-8.9486-4.4164-10.8407   C9.8358,68.6521,9.2356,68.2963,8.5831,68.2963z M8.5831,82.4768c-1.3298,0-2.4117-1.0819-2.4117-2.4117   c0-0.8067,1.0833-3.4005,2.4117-6.1037c1.3284,2.7026,2.4114,5.296,2.4114,6.1037C10.9944,81.3949,9.9126,82.4768,8.5831,82.4768z" fill="#000000"/>
+		                    </g>
+		                    <g transform="translate(320, 70)">
+			                    <g><text font-size="80px" dominant-baseline="text-before-edge" alignment-baseline="text-before-edge" fill="#000000" font-family="Montserrat">vacunastat</text></g>
+		                    </g>
+	                    </svg>
+                    </div>
+                </div>
+            </div> -->
+            <div id="menu__reporte" class="row sticky-top bg-light mx-0 rounded">
+                <div class="col-sm-12 col-lg-7 my-2">
+                    <form id="reporte-rango" class="d-flex align-items-center">
+                        <input name="fecha-inicial" type="date" class="form-control mx-2 flex-fill" min="2021-02-16"
+                            value="2021-02-16" style="width: 30%;">
+                        <div class="input-group-addon flex-fill text-center">a</div>
+                        <input name="fecha-final" type="date" class="form-control mx-2 fechaActual flex-fill"
+                            min="2021-02-21" style="width: 30%;">
+                        <input type="hidden" name="reporte" value="reporte-rango">
+                        <button class="btn btn-outline-secondary flex-fill" type="submit">
+                            <p class="my-0">Generar Reporte</p>
+                        </button>
+                    </form>
+                </div>
+                <div class="col-sm-12 col-lg-5 my-2">
+                    <form id="reporte-dia" class=" d-flex align-items-center">
+                        <input name="fecha" type="date" class="form-control mx-2 fechaActual flex-fill" min="2021-02-16"
+                            style="width: 50%;">
+                        <input type="hidden" name="reporte" value="reporte-fecha">
+                        <button class="btn btn-outline-secondary flex-fill" type="submit">
+                           <p class="my-0">Generar Reporte</p>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Mapa del Aplicativo -->
+            <div class="row my-1 border-bottom">
+                <div class="col-sm-12 my-1 d-flex align-items-center justify-content-center">
+                    <div id="mapa"></div>
+                    <pre id="features" style="position: absolute; top: 20vh; right: 0; bottom: 0; width: 20%; overflow: auto; background: rgba(255, 255, 255, 0.8); z-index:99"></pre>
+                </div>
+            </div>
+
+            <!-- Cards Dosis, Efectividad y Aplicadas -->
+            <div class="row">
+                <div class="col-sm-12 col-md-4">
+                    <div class="card">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <img class="d-flex img-fluid img__card" src="./img/dosisAsignadas.png"> 
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="card-title"><b>Dosis Asignadas</b></h5>
+                                <p id="card_dosis_asignadas" class="card-text">Sin calcular</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-4">
+                    <div class="card">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <img class="d-flex img-fluid img__card" src="./img/efectividad.png">
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="card-title"><b>Efectividad</b></h5>
+                                <p id="card_efectividad" class="card-text">Sin calcular</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-4">
+                    <div class="card">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <img class="d-flex img-fluid img__card" src="./img/dosisAplicadas.png">
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="card-title"><b>Dosis Aplicadas</b></h5>
+                                <p id="card_dosis_aplicadas" class="card-text">Sin calcular</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de departamentos,apartado de Twitter y medidor Gauge -->
+            <div class="row border-bottom my-2">
+                <div class="col-sm-12 col-lg-7 py-2">
+                    <div class="tabla__scroll">
+                        <table id="tabla_departamentos" class="table table-bordered">
+                            <thead>
+                                <tr class="table-dark">
+                                    <th scope="col" class="text-center">#</th>
+                                    <th scope="col" class="text-center">Departamento</th>
+                                    <th scope="col" class="text-center">Población</th>
+                                    <th scope="col" class="text-center">Vacunados</th>
+                                    <th scope="col" class="text-center">% Vacunados</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">1</th>
+                                    <td>Sin calcular</td>
+                                    <td>Sin calcular</td>
+                                    <td>Sin calcular</td>
+                                    <td>Sin calcular</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Medidor Gauge y Twitter MinSalud -->
+                <div class="col-sm-12 col-lg-5 d-flex flex-column align-items-stretch">
+                    <div class="align-self-stretch">
+                        <div id="gauge"></div>
+                    </div>
+                    <div class="twitter__scroll align-self-stretch">
+                        <a class="twitter-timeline" href="https://twitter.com/MinSaludCol?ref_src=twsrc%5Etfw"></a>
+                        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+                    </div>
+                </div>
+            </div>
+            <!-- Cards de primeras y segundas dosis aplicadas  -->
+            <div class="row border-bottom">
+                <div class="col-sm-12 col-md-6 my-2">
+                    <div class="card">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <img class="d-flex img-fluid img__card" src="./img/primeraDosis.png">
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="card-title"><b>Primeras Dosis</b></h5>
+                                <p id="card_primer_dosis"  class="card-text">Sin calcular</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6 my-2">
+                    <div class="card">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <img class="d-flex img-fluid img__card" src="./img/segundaDosis.png">
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="card-title"><b>Segundas Dosis</b></h5>
+                                <p id="card_segundas_dosis" class="card-text">Sin calcular</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Gráfico de Burbujas -->
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="filas">
+                        <canvas id="burbujas"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Gráfica de Vacunas Díarias por Departamento-->
+            <form id="reporte-diario-departamento" class="row">
+                <div class="col-sm-12 col-lg-6 d-flex align-items-center my-2">
+                    <input name="fecha-inicial" type="date" class="form-control mx-2 flex-fill" min="2021-02-16" value="2021-02-16" >
+                    <div class="input-group-addon flex-fill text-center">a</div>
+                    <input name="fecha-final" type="date" class="form-control mx-2 fechaActual flex-fill" min="2021-02-21" max="2021-05-25">
+                </div>  
+                <div class="col-sm-12 col-lg-6 d-flex align-items-center my-2">
+                        <select name="DEP" id="seleccion_departamento" class="flex-fill">
+                            <option>Seleccione el Departamento</option>
+                        </select>
+                        <input type="hidden" name="reporte" value="reporte-departamento">
+                        <input type="hidden" id="cargar_reporter_departamento" value="inicio">
+                        <button class="btn btn-outline-secondary mx-1 flex-fill" type="submit">
+                            <p class="my-0">Reporte Diario</p>
+                        </button>
+                </div>
+            </form>
+            <div class="row">
+                <div class="col-sm-12 filas">
+                    <canvas id="vacunasReporte" class="grafico"></canvas>  
+                </div>
+            </div>
+        </main>
+        <footer class="footer">
+            <div class="row d-flex align-items-center justify-content-center">
+                <div class="col-sm-12">
+                    <p class="my-0 py-0"><b>Proyecto Desarrollado por:</b> Brandon Alexander Rodriguez Caro y Diego Adrián Meneses Romero
+                    </p>
+                </div>
+                <div class="col-sm-12">
+                    <p class="my-0 py-0"><b>Datos Recopilados por:</b> <a href="https://docs.google.com/spreadsheets/d/1z2KYfMvDMLHb3f1xQMDHM5Q9ll_vIwe764XBBQF7P2E/edit#gid=0"
+                            target="_blank">Pilar e Igor</a>
+                    </p>
+                </div>
+                <div class="col-sm-12">
+                    <p class="my-0 py-0"><b>Desarrollado con:</b> Bootstrap v5.0, C3JS, Chart.js y Mapbox </p>
+                </div>
+                <div class="col-sm-12">
+                    <p><b>Diseños: </b> <a href="/diseños.html" target= "_blank"> ver diseños </a></p>
+                </div>
+            </div>
+
+        </footer>
+    </div>
+</body>
+
+</html>
