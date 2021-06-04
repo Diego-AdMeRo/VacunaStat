@@ -68,7 +68,7 @@ sudo systemctl status mongod
 1. Teniendo en cuenta que el aplicativo requiere de la actualización constante de los datos de vacunación, se debe tener instaladas las siguientes dependencias de Python:
    - Librerías necesarias para la extracción de datos de documento Google Sheets
    ```console
-   pip3 install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib`
+   pip3 install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
    ```
    - Librería necesaria para la conectividad con la base de datos NoSQL MongoDB
    ```console
