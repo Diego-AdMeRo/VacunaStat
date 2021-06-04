@@ -14,18 +14,18 @@ class Operaciones():
         with open("../docs/datos.json", encoding='utf8') as archivo:
             datos = json.loads(archivo.read())
             self.diccionarios = datos["llaves"]
-            self.departamentos = datos["departamentos"]  # Esto tiene en cuenta tanto el nombre como su población
+            self.departamentos = datos["departamentos"]  # Esto tiene en cuenta tanto el nombre como su población y indice de pobreza
 
     def reporteGeneral(self, fechaInicial, fechaFinal):
         diccionario_fecha_inicial_asignaciones = {}
         diccionario_fecha_final_asignaciones = {}
         rango = (fechaFinal - fechaInicial).days
 
-        # Posible problema
         # --------------- FECHA INICIAL -------------
+        fechaInicialTotal = datetime.strptime("2021-02-16", "%Y-%m-%d")
         for departamento in self.diccionarios:
             query = [
-                {'$match': {'FECHA': {'$gte': fechaInicial, '$lt': fechaFinal}}},
+                {'$match': {'FECHA': {'$gte': fechaInicialTotal, '$lt': fechaInicial + timedelta(hours=10)}}},
                 {'$group': {'_id': '$None', 'suma': {'$sum': '$'+str(departamento)}}}
             ]
             asignadas_suma_departamento = self.collection_asignadas.aggregate(query)
@@ -35,7 +35,7 @@ class Operaciones():
         # --------------- FECHA FINAL ---------------
         for departamento in self.diccionarios:
             query = [
-                {'$match': {'FECHA': {'$gte': fechaInicial, '$lt': fechaFinal}}},
+                {'$match': {'FECHA': {'$gte': fechaInicialTotal, '$lt': fechaFinal + timedelta(hours=10)}}},
                 {'$group': {'_id': '$None', 'suma': {'$sum': '$'+str(departamento)}}}
             ]
             asignadas_suma_departamento = self.collection_asignadas.aggregate(query)
@@ -120,7 +120,9 @@ class Operaciones():
                     "PORC_VAC": self.formatoPorcentaje(diccionario_fecha_final_aplicadas[departamento] / self.departamentos[departamento]["poblacion"]*100),
                     "POB": self.departamentos[departamento]["poblacion"]
                 }
-            if departamento == "CO":
+            if departamento != "CO":
+                datos["IND_POBR"] = self.departamentos[departamento]["indicePobreza"]
+            elif departamento == "CO":
                 datos["SEG_DOSIS"] = segundas_dosis if segundas_dosis != -100000 else 0
                 datos["PORC_VAC_SEG"] = self.formatoPorcentaje(segundas_dosis/self.departamentos[departamento]["poblacion"]*100)
             respuesta.append(datos)

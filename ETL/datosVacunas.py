@@ -5,7 +5,7 @@ import pymongo
 import json
 import datetime
 import sys
-from correo import Correo
+#from correo import Correo
 
 
 def esNumero(palabra):
@@ -39,7 +39,7 @@ def main():
     configuracion = cargarJSON("./docs/configuracion.json")
     conexion = conexionSheets("./docs/token.json", "./docs/credentials.json")
     sheet = conexion.spreadsheets()
-    # correo = Correo()
+    #correo = Correo()
     mensaje = ""
 
     result = sheet.values().get(
@@ -50,7 +50,7 @@ def main():
     if not datos:
         mensaje = "No se han encontrado datos"
         anadirLog(mensaje)
-        # correo.enviarCorreo(mensaje)
+        #correo.enviarCorreo(mensaje)
     else:
         try:
             myclient = pymongo.MongoClient("mongodb://localhost:27017/")
@@ -60,22 +60,28 @@ def main():
             nuevoIndex = configuracion["indice vacunas"]
             for fila in datos:
                 auxDic = {}
+                anterior = diccionarios[0]
                 if len(fila) == 43:
                     nuevoIndex += 1
                     fecha = datetime.datetime.strptime(fila[0], "%Y-%m-%d")
                     if fila[2].strip() == "-1":  # Primera Dosis
                         for index, diccionario in enumerate(diccionarios, start=5):
-                            #if index == 9 or index == 12 or index == 27 or index == 39:
-                            #    auxDic[diccionario-1] = auxDic[diccionario-1] + esNumero(fila[index])
-                            #else:
+                            if index == 9 or index == 12 or index == 27 or index == 39:
+                                auxDic[anterior] = auxDic[anterior] + esNumero(fila[index])
+                            else:
                                 auxDic[diccionario] = esNumero(fila[index])
+                            anterior = diccionario
                         # auxDic["FECHA"] = fila[0]
                         auxDic["FECHA"] = fecha
                         mycol = mydb["primeras"]
                         mycol.insert_one(auxDic)
                     elif fila[2].strip() == "1":  # Asignación
                         for index, diccionario in enumerate(diccionarios, start=5):
-                            auxDic[diccionario] = esNumero(fila[index])
+                            if index == 9 or index == 12 or index == 27 or index == 39:
+                                auxDic[anterior] = auxDic[anterior] + esNumero(fila[index])
+                            else:
+                                auxDic[diccionario] = esNumero(fila[index])
+                            anterior = diccionario
                         auxDic["TIPO_VACUNA"] = fila[1]
                         # auxDic["FECHA"] = fila[0]
                         auxDic["FECHA"] = fecha
@@ -91,11 +97,11 @@ def main():
             guardarJSON("./docs/configuracion.json", configuracion)
             mensaje = "Nuevos Datos Agregados"
             anadirLog(mensaje)
-            # correo.enviarCorreo(mensaje)
+            #correo.enviarCorreo(mensaje)
         except:
             mensaje = f"Error al Agregar Nuevos Datos {sys.exc_info()[0]}"
             anadirLog(mensaje)
-            # correo.enviarCorreo(mensaje)
+            #correo.enviarCorreo(mensaje)
             print("Error al cargar los datos")
 
 

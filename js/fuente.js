@@ -1,4 +1,8 @@
-var mapa, medidorGauge, graficaBurbujas, graficaLinea;
+var mapa, medidorGauge, graficaBurbujas, graficaLinea, capas = [], datos = {};
+var popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false
+});
 
 window.onload = function () {
         //-------------- Asignar Fecha Actual en los datepicker -----------------------
@@ -25,47 +29,37 @@ window.onload = function () {
         //-------------------------- Cargado de Reporte -------------------------------
         cargarDepartamentos();
         solicitarReporte(document.getElementById("reporte-rango"));
-        var popup = new mapboxgl.Popup({
-        closeButton: false,
-        closeOnClick: false
-        });
-        mapa.on('mousemove', function (e) {
-                var features = mapa.queryRenderedFeatures(e.point);
-                var displayProperties = [
-                        'type',
-                        'properties',
-                        'id',
-                        'layer',
-                        'source',
-                        'sourceLayer',
-                        'state'
-                        ];
-                var displayFeatures = features.map(function (feat) {
-                        var displayFeat = {};
-                        displayProperties.forEach(function (prop) {
-                                displayFeat[prop] = feat[prop];
-                        });
-                        return displayFeat;
+        mapa.on("mousemove", function (e) {
+                var fs = mapa.queryRenderedFeatures(e.point, {
+                        layers: capas
                 });
-                var verificacion ='No esta en capa\n'+e.lngLat.lng+'\n'+e.lngLat.lat+'\n';
-                //try{  
-                if(typeof displayFeatures[0]  !== 'undefined'){
-                        if(displayFeatures[0].hasOwnProperty("properties")){
-                                if(displayFeatures[0].properties.pais == 'Colombia' || displayFeatures[0].properties.iso_3166_1=='CO'){
-                                        mapa.getCanvas().style.cursor = 'pointer';
-                                        verificacion = 'Esta en capa\n'+e.lngLat.lng+'\n'+e.lngLat.lat+'\n';
-                                        popup.setLngLat(e.lngLat).setHTML('<strong>Testing</strong>\n<p><b>Departamento: </b>'+displayFeatures[0].properties.departamento+'<p>').addTo(mapa);
-                                }else{
-                                        mapa.getCanvas().style.cursor = '';
-                                        popup.remove();
+                if (fs.length > 0 && datos.length > 0) {
+                        f = fs[0];
+                        mapa.getCanvas().style.cursor = "pointer";
+                        var dept = {};
+                        datos.forEach((e)=> {
+                                if(e['COD']== f.layer.id){
+                                        dept = e;
                                 }
-                        }
+                        });
+                        popup.setLngLat(e.lngLat)
+                            .setHTML(
+                                    `<h6 style="text-align: center; font-weight: bold"> ${dept.NOM} - (${f.layer.id})</h6>
+                                    <p>Poblacion: </b>${formatoNumero(dept.POB)}</br>
+                                    <b>VS-FI: </b>${formatoNumero(dept.ASIG_INI)}</br>
+                                    <b>VS-FF: </b>${formatoNumero(dept.ASIG_FIN)}</br>
+                                    <b>VA-FI: </b>${formatoNumero(dept.APLI_INI)}</br>
+                                    <b>VA-FF: </b>${formatoNumero(dept.APLI_FIN)}</br>
+                                    <b>E-FI: </b>${formatoNumero(dept.EFEC_INI)}%</br>
+                                    <b>E-FF: </b>${formatoNumero(dept.EFEC_FIN)}%</br>
+                                    <b>E-P: </b>${formatoNumero(dept.EFEC_PROM)}%</br>
+                                    <b>T-E: </b>${formatoNumero(dept.EFEC_TEND)}%</br>
+                                    <b>V%: </b>${formatoNumero(dept.PORC_VAC)}%</p>`
+                            ).addTo(mapa);
+                } else {
+                    mapa.getCanvas().style.cursor = "";
+                    popup.remove();
                 }
-                //}catch (error){
-                //        console.log(error);
-                //}
-                var info = JSON.stringify(displayFeatures,null,2);
-                document.getElementById('features').innerHTML =verificacion +'\n'+ info;
         });
 };
 
@@ -113,6 +107,28 @@ function mensajeError(infoError) {
         menu.appendChild(mensaje);
 };
 
+//------------------------Validador de Fecha -------------------------------------
+function validarFecha(elemento, tipo){
+    const padre = document.getElementById("menu__reporte");
+    const error = padre.lastElementChild.lastElementChild.previousElementSibling;
+    if (error != null){
+            if (error.textContent.trim() == "La Fecha superior es menor a la inferior, favor volver a intentar"){
+                    padre.removeChild(padre.lastElementChild);    
+            }
+    }
+    if (tipo == "FF"){
+            console.log("Fecha Final");
+            if (new Date(elemento.parentElement.firstElementChild.value).getTime() >= new Date(elemento.value).getTime()){
+                    mensajeError("La Fecha superior es menor a la inferior, favor volver a intentar");
+            }
+    }else if (tipo == "FI"){
+            console.log("Fecha Inicial");
+            if (new Date(elemento.parentElement.lastElementChild.previousElementSibling.previousElementSibling.value).getTime() <= new Date(elemento.value).getTime()){
+                    mensajeError("La Fecha superior es menor a la inferior, favor volver a intentar");
+            }
+    }
+}
+
 //-------------------------Formato numerico de los datos---------------------------
 
 function formatoNumero(numero){
@@ -123,7 +139,7 @@ function actualizarCards(datos){
         //Dosis Asignadas, Efectividad, Dosis Aplicadas, Primeras Dosis, Segundas Dosis
         document.getElementById("card_dosis_asignadas").textContent = formatoNumero(datos.ASIG_FIN);
         document.getElementById("card_efectividad").textContent = `${formatoNumero(datos.EFEC_FIN)} %`;
-        document.getElementById("card_dosis_aplicadas").textContent = formatoNumero(datos.APLI_FIN);
+        document.getElementById("card_dosis_aplicadas").textContent = formatoNumero(datos.APLI_FIN + datos.SEG_DOSIS);
         document.getElementById("card_primer_dosis").textContent = formatoNumero(datos.APLI_FIN);
         document.getElementById("card_segundas_dosis").textContent = formatoNumero(datos.SEG_DOSIS);
 };
@@ -179,7 +195,7 @@ function actualizarGauge(datos){
                 columns: [
                         [`% vacunados primer dosis`, datos.PORC_VAC],
                         [`% vacunados segunda dosis`, datos.PORC_VAC_SEG],
-                        [`Inmunidad por Revaño en Colombia`, 70]           
+                        [`% vacunados necesarios para lograr inmunidad por revaño`, 70]           
                 ],
         });
 };
@@ -188,25 +204,36 @@ function actualizarGraficoBurbujas(datos){
         while(graficaBurbujas.data.datasets.length !== 0){
                  graficaBurbujas.data.datasets.pop();
         }
-        graficaBurbujas.data.labels = [];
+        //graficaBurbujas.data.labels = [];
         for (departamento of datos){
                 if(departamento.COD !== "CO"){
                 graficaBurbujas.data.datasets.push({
-                        label: departamento.NOM, 
-                        data: [{x: departamento.EFEC_FIN, y: departamento.APLI_FIN / 10000, r: departamento.APLI_FIN / 100000}], 
-                        backgroundColor: `#${Math.floor(Math.random()*16777215).toString(16)}`
+                        label: departamento.NOM,
+                        title: departamento.NOM,
+                        data: [{x: departamento.IND_POBR*100, y: departamento.POB/1000, r: departamento.PORC_VAC/4.8}], 
+                        backgroundColor: `#${Math.floor(Math.random()*16777215).toString(16)}`,
+                        poblacion: departamento.POB,
+                        porcentajeVacunacion: departamento.PORC_VAC,
+                        indicePobreza: departamento.IND_POBR*100
                 });
                 }
         }
         graficaBurbujas.update();
-        console.log(datos);
 };
 
 function actualizarVacunacionDepartamento(tipo, datos, limpiar){  
-        while (graficaLinea.data.datasets.length != 0 && limpiar){
-                graficaLinea.data.datasets.pop();
+        if(limpiar){
+                while (graficaLinea.data.datasets.length != 0){
+                        graficaLinea.data.datasets.pop();
+                }
+                let labels = []
+                datos.forEach(dato => labels.push(dato.x));
+                graficaLinea.data.labels = labels;
         }
-        graficaLinea.data.labels = [];
+        if (tipo == "SD"){
+        //console.log(datos);
+        //console.log(graficaLinea.data);
+        }
         let nombre = tipo == "SD" ? "Segundas Dosis" : "Primeras Dosis ";
         let color = tipo == "SD" ? "rgb(101, 76, 165)" : "rgb(244, 113, 64)";
         graficaLinea.data.datasets.push({
@@ -230,11 +257,12 @@ function solicitarReporte(form) {
                         if (respuesta.hasOwnProperty("R")){
                                 if(respuesta.R == "S"){
                                         if(respuesta.T == "G"){ 
-                                                actualizarCards(respuesta.DATA[respuesta.DATA.length-1]);
-                                                actualizarTabla(respuesta.DATA);
-                                                actualizarGauge(respuesta.DATA[respuesta.DATA.length-1]);
-                                                actualizarMapa(respuesta.DATA);
-                                                actualizarGraficoBurbujas(respuesta.DATA);
+                                                actualizarCards(respuesta.D[respuesta.D.length-1]);
+                                                actualizarTabla(respuesta.D);
+                                                actualizarGauge(respuesta.D[respuesta.D.length-1]);
+                                                actualizarMapa(respuesta.D);
+                                                actualizarGraficoBurbujas(respuesta.D);
+                                                datos = respuesta.D;
                                         }else if (respuesta.T == "D"){
                                                 if (respuesta.hasOwnProperty("PD")){
                                                         actualizarVacunacionDepartamento("PD", respuesta.PD, true);
@@ -244,7 +272,17 @@ function solicitarReporte(form) {
                                                 }
                                         }
                                 }else if (respuesta.R == "E"){
-                                        mensajeError("Error al cargar la información");
+                                        if (respuesta.T == "PF"){
+                                                mensajeError("La Fecha superior es menor a la inferior, favor volver a intentar");
+                                        }else if (respuesta.T == "EV"){
+                                                mensajeError("El formato de la fecha ingresado es incorrecto, favor volver a intentar");
+                                        }else if (respuesta.T == "EC"){
+                                                mensajeError("Las fechas ingresadas no son validas, favor volver a intentar");
+                                        }else if (respuesta.T == "DE"){
+                                                mensajeError("El departamento ingresado es incorrecto, favor volver a intentar");
+                                        }else{
+                                                mensajeError("Error al cargar la información, favor volver a intentar");
+                                        }
                                 }
                         }
                         eliminarCarga(form);
@@ -252,7 +290,7 @@ function solicitarReporte(form) {
         };
         peticion.onloadend = function () {
                 if (this.status / 100 == 4 || this.status / 100 == 5) {
-                        mensajeError("Error al cargar la Información");
+                        mensajeError("Error al cargar la Información, favor volver a intentar");
                         eliminarCarga(form);
                 }
         };
@@ -275,6 +313,9 @@ function cargarDepartamentos(){
                                         opcion.setAttribute("value", departamento.COD);
                                         opcion.textContent = departamento.NOM;
                                         fragment.appendChild(opcion);
+                                        if (departamento.COD != "CO"){
+                                            capas.push(departamento.COD);
+                                        }
                                 }
                                 fragment.lastElementChild.selected = "selected";
                                 document.getElementById("seleccion_departamento").appendChild(fragment);
@@ -283,8 +324,14 @@ function cargarDepartamentos(){
                                         solicitarReporte(document.getElementById("reporte-diario-departamento"));
                                         cargar.value = "cargado";
                                 }
-                        }else{
-                                mensajeError("Error al cargar los Departamentos");
+                                const visitas = document.getElementById("pg-contador");
+                                visitas.textContent = formatoNumero(respuesta.V);
+                        }else if (respuesta.R == "E"){
+                                if (respuesta.T == "DE"){
+                                        mensajeError("El departamento ingresado es incorrecto, favor volver a intentar");
+                                }else{
+                                        mensajeError("Error al cargar los Departamentos, favor volver a intentar");
+                                }
                         }
                 }
         }
@@ -292,25 +339,24 @@ function cargarDepartamentos(){
 
 
 //------------------------------- Estilos Mapa -------------------------------------
-
-function actualizarMapa(datos){
+function actualizarMapa(datos) {
         //console.log(datos);
-        //datos.forEach(
-        //function(dept){
-        //    const excepciones = ['BAR', 'CAR', 'STM', 'BAV', 'CO'];
-        //    if(!excepciones.includes(dept.COD)){
-        //        var op = parseFloat(dept.EFEC_PROM);
-        //        var totalidad = parseFloat(dept.APLI_FIN)/parseFloat(dept.POB);
-        //        var color = '#009900';
-        //        if(totalidad < 0.66){
-        //            color = '#F6BE00';
-        //        }
-        //        if(totalidad < 0.33){
-        //            color = '#a1000e';
-        //        }
-        //console.log(totalidad);
-        //        mapa.setPaintProperty(dept.COD, 'fill-color', color);
-        //        mapa.setPaintProperty(dept.COD,'fill-opacity',op/100);
-        //    }
-        //});
-}
+        datos.forEach(function (dept) {
+                //const excepciones = ["BAR", "CAR", "STM", "BAV", "CO"];
+                //if (!excepciones.includes(dept.COD)) {
+                if(dept.COD != "CO"){
+                        var op = parseFloat(dept.EFEC_PROM);
+                        var totalidad = parseFloat(dept.APLI_FIN) / parseFloat(dept.POB);
+                        var color = "#009900";
+                        if (totalidad < 0.66) {
+                                color = "#F6BE00";
+                        }
+                        if (totalidad < 0.33) {
+                                color = "#a1000e";
+                        }
+                        //console.log(totalidad);
+                        mapa.setPaintProperty(dept.COD, "fill-color", color);
+                        mapa.setPaintProperty(dept.COD, "fill-opacity", op / 100);
+                }
+        });
+};
