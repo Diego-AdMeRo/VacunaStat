@@ -23,6 +23,7 @@ El aplicativo se encuentra dividido en tres apartados principales:
    Finalmente, el Backend hace referencia a la carpeta CGI y scripts Python que son ejecutados por el servidor Apache, específicamente el _controlador.py_ se encarga de tomar las peticiones provenientes de los clientes, analizar el contenido y redirigirlo a los métodos disponibles en script _operaciones.py_ el cual genera una conexión con la base de datos, trae los datos, los procesa, les da formato según las respuestas establecidas, y los retorna para que el controlador responda el contenido en formato JSON.
 
 ## Instalación
+La instalación de los recursos, librerías y/o dependencias se encuentra sujeto a la distribución del sistema operativo utilizado, en este caso la presentada a continuación fue realizada en **Ubuntu 20.04.2 LTS**.
 
 ### Configuración de Entorno
 
@@ -40,8 +41,12 @@ El aplicativo fue diseñado e implementado para funcionar en conjunto con el ser
   ```console
   sudo apt install -y mongodb
   ```
-  Así mismo se requiere la creación de la base de datos y las respectivas Collections
+  Inicialización del servicio
+  ```console
+  sudo systemctl start mongod.service
   ```
+  Así mismo se requiere la creación de la base de datos y las respectivas Collections
+  ```javascript
   use vacunas;
   db.createCollection("asignadas");
   db.createCollection("primeras");
@@ -74,13 +79,20 @@ sudo systemctl status mongod
    ```console
    pip3 install pymongo
    ```
-2. Copie el repositorio en el directorio _/var/www/html_ y luego diríjase a _etc/apache2/sites-enable_ para configurar el virtual host de despliegue, si desea utilizar disponible por default (_000-default.conf_) asigne las siguientes propiedades:
+2. Copie el repositorio en el directorio _/var/www/html_ y luego diríjase a _/etc/apache2/sites-available/_ para configurar el virtual host de despliegue, si desea utilizar disponible por default (_000-default.conf_) asigne las siguientes propiedades:
    ```console
-   ServerName vacunastat
-   ServerAdmin vacunastat
-   DocumentRoot /var/www/html/vacstat
+   ServerName VacunaStat
+   ServerAdmin VacunaStat
+   DocumentRoot /var/www/html/VacunaStat
    ```
    Por otro lado, en caso de querer validar su sitio web con un certificado SSL, remítase a la documentación formal del aplicativo.
+   
+3. Comprobar configuración de cambios del servidor Apache y su reinicio:
+   ``` console
+   sudo apachectl configtest
+   sudo systemctl restart apache2.service
+   ```
+   
 3. Finalmente, correr el archivo _daemon-vacunas.sh_ y para obtener actualización de los datos agregarlo a la ejecución programada del sistema mediante el servicio crontab del usurario root:
    ```console
    sudo crontab -u root -e
