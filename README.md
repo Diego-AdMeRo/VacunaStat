@@ -99,7 +99,7 @@ sudo systemctl status mongod
    ```
    y añadir:
    ```console
-   00 00 * * * /var/www/html/vacstat/ETL/daemon-vacunas.sh >> /var/www/html/vacstat/ETL/docs/datos-vacunas.log 2>&1
+   00 00 * * * /var/www/html/VacunaStat/ETL/daemon-vacunas.sh >> /var/www/html/VacunaStat/ETL/docs/datos-vacunas.log 2>&1
    ```
 
 ## Construida con:
